@@ -1,6 +1,6 @@
 Revision history for CPAN-UnsupportedFinder
 
-0.02
+0.02	Sun Jan  5 16:37:57 EST 2025
 	Improved GitHub Actions support
 	Added support for Appveyor
 
