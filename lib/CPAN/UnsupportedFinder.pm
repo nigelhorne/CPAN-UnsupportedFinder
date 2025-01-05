@@ -240,6 +240,6 @@ __END__
 
 Nigel Horne <njh@bandsman.co.uk>
 
-=head1 LICENSE
+=head1 LICENCE
 
 This program is released under the following licence: GPL2

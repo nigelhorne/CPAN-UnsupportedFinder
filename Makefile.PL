@@ -41,6 +41,7 @@ WriteMakefile(
 	'Test::HTML::Lint' => 0,
 	'Test::JSON' => 0,
         'Test::Most' => 0,
+	'Test::RequiresInternet' => 0,
     }, dist => $dist,
     clean => { FILES => 'CPAN-UnsupportedFinder-*' },  # Clean up distribution files
 );

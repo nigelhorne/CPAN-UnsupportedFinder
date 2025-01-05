@@ -7,6 +7,8 @@ use Test::Most tests => 11;
 use Test::HTML::Lint;
 use Test::JSON;
 
+use Test::RequiresInternet ('fastapi.metacpan.org' => 443, 'api.cpantesters.org' => 443);
+
 BEGIN { use_ok('CPAN::UnsupportedFinder') }
 
 # Create a test instance of CPAN::UnsupportedFinder
