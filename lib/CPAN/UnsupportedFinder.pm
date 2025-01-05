@@ -10,7 +10,11 @@ use Log::Log4perl;
 
 =head1 NAME
 
-CPAN::UnsupportedFinder - Identify unsupported or poorly maintained CPAN modules.
+CPAN::UnsupportedFinder - Identify unsupported or poorly maintained CPAN modules
+
+=head1 DESCRIPTION
+
+CPAN::UnsupportedFinder analyzes CPAN modules for test results and maintenance status, flagging unsupported or poorly maintained distributions.
 
 =head1 VERSION
 
@@ -32,10 +36,6 @@ our $VERSION = '0.01';
 	  print "Failure Rate: $module->{failure_rate}\n";
 	  print "Last Update: $module->{last_update}\n";
   }
-
-=head1 DESCRIPTION
-
-CPAN::UnsupportedFinder analyzes CPAN modules for test results and maintenance status, flagging unsupported or poorly maintained distributions.
 
 =head1 METHODS
 

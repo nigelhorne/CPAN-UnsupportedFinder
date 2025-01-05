@@ -4,12 +4,14 @@ name: CPAN Unsupported Finder
 on:
   push:
     branches:
-      - main
+      - '*'
+    tags-ignore:
+      - '*'
   # workflow_dispatch:
   pull_request:
 
 jobs:
-  run-cpan-check:
+  build:
     runs-on: ubuntu-latest
 
     steps:
