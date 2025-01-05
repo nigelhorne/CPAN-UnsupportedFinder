@@ -42,6 +42,6 @@ Analyzes the provided modules. Returns an array reference of unsupported modules
 
 Nigel Horne <njh@bandsman.co.uk>
 
-# LICENSE
+# LICENCE
 
 This program is released under the following licence: GPL2
