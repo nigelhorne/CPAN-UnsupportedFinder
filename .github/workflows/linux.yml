@@ -1,0 +1,61 @@
+---
+name: CPAN Unsupported Finder
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-cpan-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          # Set the desired Perl version
+          perl-version: '5.32'
+
+      - name: Install dependencies
+        run: |
+          cpanm --notest --quiet HTTP::Tiny JSON Carp Log::Log4perl
+
+      - name: Run Unsupported Modules Analysis
+        run: |
+          mkdir -p reports
+          perl -MCPAN::UnsupportedFinder -e '
+            my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
+            my $results = $finder->analyze("Test::MockModule", "Old::Unused::Module");
+            my $json_report = $finder->output_results($results, "json");
+            open my $fh, ">", "reports/unsupported_modules.json" or die $!;
+            print $fh $json_report;
+            close $fh;
+          '
+
+      - name: Upload Analysis Report (JSON)
+        uses: actions/upload-artifact@v3
+        with:
+          name: unsupported-modules-report
+          path: reports/unsupported_modules.json
+
+      - name: Generate HTML Report
+        run: |
+          perl -MCPAN::UnsupportedFinder -e '
+            my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
+            my $results = $finder->analyze("Test::MockModule", "Old::Unused::Module");
+            my $html_report = $finder->output_results($results, "html");
+            open my $fh, ">", "reports/unsupported_modules.html" or die $!;
+            print $fh $html_report;
+            close $fh;
+          '
+
+      - name: Upload Analysis Report (HTML)
+        uses: actions/upload-artifact@v3
+        with:
+          name: unsupported-modules-html-report
+          path: reports/unsupported_modules.html
