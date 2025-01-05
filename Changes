@@ -1,4 +1,7 @@
 Revision history for CPAN-UnsupportedFinder
 
+0.02
+	Improved GitHub Actions support
+
 0.01	Sun Jan  5 16:21:51 EST 2025
         First draft

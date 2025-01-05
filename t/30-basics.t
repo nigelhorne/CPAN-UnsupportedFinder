@@ -3,13 +3,17 @@
 use strict;
 use warnings;
 
-use Test::Most tests => 11;
+use Test::Most;
 use Test::HTML::Lint;
 use Test::JSON;
 
 use Test::RequiresInternet ('fastapi.metacpan.org' => 443, 'api.cpantesters.org' => 443);
 
-BEGIN { use_ok('CPAN::UnsupportedFinder') }
+BEGIN {
+	plan skip_all => 'NO_NETWORK_TESTING set' if $ENV{'NO_NETWORK_TESTING'};
+	plan tests => 11;
+	use_ok('CPAN::UnsupportedFinder')
+}
 
 # Create a test instance of CPAN::UnsupportedFinder
 my $finder = CPAN::UnsupportedFinder->new(verbose => $ENV{'TEST_VERBOSE'} ? 1 : 0);
