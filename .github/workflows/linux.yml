@@ -41,7 +41,7 @@ jobs:
           '
 
       - name: Upload Analysis Report (JSON)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: unsupported-modules-report
           path: reports/unsupported_modules.json
@@ -58,7 +58,7 @@ jobs:
           '
 
       - name: Upload Analysis Report (HTML)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: unsupported-modules-html-report
           path: reports/unsupported_modules.html
