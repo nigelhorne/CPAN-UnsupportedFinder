@@ -3,10 +3,11 @@ package CPAN::UnsupportedFinder;
 use strict;
 use warnings;
 
-use JSON;
-use HTTP::Tiny;
 use Carp;
+use HTTP::Tiny;
 use Log::Log4perl;
+use JSON;
+use Scalar::Util;
 
 =head1 NAME
 
@@ -28,8 +29,9 @@ our $VERSION = '0.01';
 
   use CPAN::UnsupportedFinder;
 
+  # Note use of hyphens not colons
   my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
-  my $results = $finder->analyze('Some::Module', 'Another::Module');
+  my $results = $finder->analyze('Some-Module', 'Another-Module');
 
   for my $module (@$results) {
 	  print "Module: $module->{module}\n";
@@ -54,18 +56,43 @@ Enable verbose output.
 =cut 
 
 sub new {
-    my ($class, %args) = @_;
-    my $self = {
-        api_url      => 'https://fastapi.metacpan.org/v1',
-        cpan_testers => 'https://api.cpantesters.org/api/v1',
-        verbose      => $args{verbose} || 0,
-    };
+	my $class = shift;
 
-    Log::Log4perl->easy_init($self->{verbose} ? $Log::Log4perl::DEBUG : $Log::Log4perl::ERROR);
-    $self->{logger} = Log::Log4perl->get_logger();
+	# Handle hash or hashref arguments
+	my %args;
+	if((@_ == 1) && (ref $_[0] eq 'HASH')) {
+		%args = %{$_[0]};
+	} elsif((@_ % 2) == 0) {
+		%args = @_;
+	} else {
+		carp(__PACKAGE__, ': Invalid arguments passed to new()');
+		return;
+	}
 
-    bless $self, $class;
-    return $self;
+	if(!defined($class)) {
+		if((scalar keys %args) > 0) {
+			# Using CPAN::UnsupportedFinder->new(), not CPAN::UnsupportedFinder::new()
+			carp(__PACKAGE__, ' use ->new() not ::new() to instantiate');
+			return;
+		}
+		# FIXME: this only works when no arguments are given
+		$class = __PACKAGE__;
+	} elsif(Scalar::Util::blessed($class)) {
+		# If $class is an object, clone it with new arguments
+		return bless { %{$class}, %args }, ref($class);
+	}
+
+	my $self = {
+		api_url	=> 'https://fastapi.metacpan.org/v1',
+		cpan_testers => 'https://api.cpantesters.org/api/v1',
+		verbose	=> $args{verbose} || 0,
+	};
+
+	Log::Log4perl->easy_init($self->{verbose} ? $Log::Log4perl::DEBUG : $Log::Log4perl::ERROR);
+	$self->{logger} = Log::Log4perl->get_logger();
+
+	# Return the blessed object
+	return bless $self, $class;
 }
 
 =head2 analyze(@modules)
@@ -80,13 +107,13 @@ sub analyze {
 
 	my @results;
 	for my $module (@modules) {
-		print "Analyzing $module...\n" if $self->{verbose};
+		$self->{logger}->debug('Analyzing module');
 
 		my $test_data	= $self->_fetch_testers_data($module);
 		my $release_data = $self->_fetch_release_data($module);
 
 		my $unsupported = $self->_evaluate_support($module, $test_data, $release_data);
-		push @results, $unsupported if $unsupported;
+		push @results, $unsupported if($unsupported);
 	}
 
 	return \@results;
@@ -96,9 +123,9 @@ sub output_results {
 	my ($self, $results, $format) = @_;
 	$format ||= 'text'; # Default to plain text
 
-	if ($format eq 'json') {
+	if($format eq 'json') {
 		return encode_json($results);
-	} elsif ($format eq 'html') {
+	} elsif($format eq 'html') {
 		return $self->_generate_html_report($results);
 	} else {
 		return $self->_generate_text_report($results);
@@ -107,7 +134,7 @@ sub output_results {
 
 sub _generate_text_report {
 	my ($self, $results) = @_;
-	my $report = "";
+	my $report = '';
 
 	for my $module (@$results) {
 		$report .= "Module: $module->{module}\n";
@@ -121,7 +148,8 @@ sub _generate_text_report {
 
 sub _generate_html_report {
 	my ($self, $results) = @_;
-	my $html = "<html><body><h1>Unsupported Modules Report</h1><ul>";
+
+	my $html = '<html><head><title>Unsupported Modules Report</title></head><body><h1>Unsupported Modules Report</h1><ul>';
 
 	for my $module (@$results) {
 		$html .= "<li><strong>$module->{module}</strong>:<br>";
@@ -129,10 +157,9 @@ sub _generate_html_report {
 		$html .= "Last Update: $module->{last_update}<br></li>";
 	}
 
-	$html .= "</ul></body></html>";
+	$html .= '</ul></body></html>';
 	return $html;
 }
-
 
 sub _fetch_testers_data {
 	my ($self, $module) = @_;
@@ -147,19 +174,19 @@ sub _fetch_release_data {
 }
 
 sub _fetch_data {
-    my ($self, $url) = @_;
-    $self->{logger}->debug("Fetching data from $url");
+	my ($self, $url) = @_;
+	$self->{logger}->debug("Fetching data from $url");
 
-    my $http = HTTP::Tiny->new;
-    my $response = $http->get($url);
+	my $http = HTTP::Tiny->new;
+	my $response = $http->get($url);
 
-    if ($response->{success}) {
-        $self->{logger}->debug("Data fetched successfully from $url");
-        return decode_json($response->{content});
-    } else {
-        $self->{logger}->error("Failed to fetch data from $url: $response->{status}");
-        return;
-    }
+	if($response->{success}) {
+		$self->{logger}->debug("Data fetched successfully from $url");
+		return decode_json($response->{content});
+	} else {
+		$self->{logger}->error("Failed to fetch data from $url: $response->{status}");
+		return;
+	}
 }
 
 sub _fetch_reverse_dependencies {
@@ -172,15 +199,15 @@ sub _evaluate_support {
 	my ($self, $module, $test_data, $release_data) = @_;
 
 	my $failure_rate = $self->_calculate_failure_rate($test_data);
-	my $last_update  = $self->_get_last_release_date($release_data);
+	my $last_update = $self->_get_last_release_date($release_data);
 	# Reverse Dependencies: Modules with many reverse dependencies have higher priority for support.
 	my $reverse_deps = $self->_fetch_reverse_dependencies($module);
 
-	if ($failure_rate > 0.5 || !$last_update || $last_update lt '2022-01-01') {
+	if($failure_rate > 0.5 || !$last_update || $last_update lt '2022-01-01') {
 		return {
-			module	   => $module,
+			module	=> $module,
 			failure_rate => $failure_rate,
-			last_update  => $last_update || 'Unknown',
+			last_update => $last_update || 'Unknown',
 			reverse_deps => $reverse_deps->{total} || 0,
 		};
 	}

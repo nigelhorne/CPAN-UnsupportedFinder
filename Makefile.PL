@@ -3,8 +3,8 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 my $dist = {
-	COMPRESS => 'gzip -9f',
-	SUFFIX => 'gz'
+        COMPRESS => 'gzip -9f', # Compress tarball using gzip
+        SUFFIX   => 'gz',       # File suffix for tarball
 };
 
 if($^O eq 'darwin') {
@@ -19,10 +19,11 @@ WriteMakefile(
     LICENSE      => 'perl',
     PREREQ_PM    => {
 	'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
-        'HTTP::Tiny'       => 0,
-        'JSON'             => 0,
-        'Carp'             => 0,
-        'Log::Log4perl'    => 0,
+        'HTTP::Tiny' => 0,
+	'JSON' => 0,
+	'Carp' => 0,
+	'Log::Log4perl' => 0,
+	'Scalar::Util' => 0,
     },
     META_MERGE => {
         resources => {
@@ -37,12 +38,9 @@ WriteMakefile(
         },
     },
     TEST_REQUIRES => {
+	'Test::HTML::Lint' => 0,
 	'Test::JSON' => 0,
-        'Test::More' => 0,
-    },
-    dist => {
-        COMPRESS => 'gzip -9f', # Compress tarball using gzip
-        SUFFIX   => 'gz',       # File suffix for tarball
-    },
+        'Test::Most' => 0,
+    }, dist => $dist,
     clean => { FILES => 'CPAN-UnsupportedFinder-*' },  # Clean up distribution files
 );

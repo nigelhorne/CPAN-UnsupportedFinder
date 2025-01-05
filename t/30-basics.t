@@ -2,7 +2,9 @@
 
 use strict;
 use warnings;
-use Test::Most tests => 10;
+
+use Test::Most tests => 11;
+use Test::HTML::Lint;
 use Test::JSON;
 
 BEGIN { use_ok('CPAN::UnsupportedFinder') }
@@ -29,7 +31,7 @@ foreach my $module (@$results) {
 
 # Test that the failure rate calculation is between 0 and 1
 foreach my $module (@$results) {
-	ok( $module->{failure_rate} >= 0 && $module->{failure_rate} <= 1, 'Failure rate is between 0 and 1' );
+	ok($module->{failure_rate} >= 0 && $module->{failure_rate} <= 1, 'Failure rate is between 0 and 1');
 }
 
 # Test that the last update is a valid date (assuming you expect a YYYY-MM-DD format)
@@ -45,3 +47,4 @@ is_valid_json($json_report, 'Output is valid JSON');
 
 my $html_report = $finder->output_results($results, 'html');
 like($html_report, qr/<html>/, 'Output contains <html> tag for HTML format');
+html_ok($html_report, 'Output is valid HTML');
