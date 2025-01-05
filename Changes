@@ -1,5 +1,8 @@
 Revision history for CPAN-UnsupportedFinder
 
+0.03
+	Allow URLs to be overridden in the constructor
+
 0.02	Sun Jan  5 16:37:57 EST 2025
 	Improved GitHub Actions support
 	Added support for Appveyor

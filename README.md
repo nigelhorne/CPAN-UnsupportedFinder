@@ -8,7 +8,7 @@ CPAN::UnsupportedFinder analyzes CPAN modules for test results and maintenance s
 
 # VERSION
 
-Version 0.01
+Version 0.02
 
 # SYNOPSIS
 
@@ -33,6 +33,14 @@ Creates a new instance. Accepts the following arguments:
 - verbose
 
     Enable verbose output.
+
+- api\_url
+
+    metacpan URL, defaults to [https://fastapi.metacpan.org/v1](https://fastapi.metacpan.org/v1)
+
+- cpan\_testers
+
+    CPAN testers URL, detaults to [https://api.cpantesters.org/api/v1](https://api.cpantesters.org/api/v1)
 
 ## analyze(@modules)
 

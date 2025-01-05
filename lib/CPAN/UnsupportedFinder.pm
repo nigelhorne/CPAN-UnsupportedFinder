@@ -47,9 +47,17 @@ Creates a new instance. Accepts the following arguments:
 
 =over 4
 
-=item verbose
+=item * verbose
 
 Enable verbose output.
+
+=item * api_url
+
+metacpan URL, defaults to L<https://fastapi.metacpan.org/v1>
+
+=item * cpan_testers
+
+CPAN testers URL, detaults to L<https://api.cpantesters.org/api/v1>
 
 =back
 
@@ -85,7 +93,8 @@ sub new {
 	my $self = {
 		api_url	=> 'https://fastapi.metacpan.org/v1',
 		cpan_testers => 'https://api.cpantesters.org/api/v1',
-		verbose	=> $args{verbose} || 0,
+		verbose	=> 0,
+		%args
 	};
 
 	Log::Log4perl->easy_init($self->{verbose} ? $Log::Log4perl::DEBUG : $Log::Log4perl::ERROR);
