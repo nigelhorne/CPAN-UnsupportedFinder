@@ -8,7 +8,50 @@ use HTTP::Tiny;
 use Carp;
 use Log::Log4perl;
 
+=head1 NAME
+
+CPAN::UnsupportedFinder - Identify unsupported or poorly maintained CPAN modules.
+
+=head1 VERSION
+
+Version 0.01
+
+=cut
+
 our $VERSION = '0.01';
+
+=head1 SYNOPSIS
+
+  use CPAN::UnsupportedFinder;
+
+  my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
+  my $results = $finder->analyze('Some::Module', 'Another::Module');
+
+  for my $module (@$results) {
+	  print "Module: $module->{module}\n";
+	  print "Failure Rate: $module->{failure_rate}\n";
+	  print "Last Update: $module->{last_update}\n";
+  }
+
+=head1 DESCRIPTION
+
+CPAN::UnsupportedFinder analyzes CPAN modules for test results and maintenance status, flagging unsupported or poorly maintained distributions.
+
+=head1 METHODS
+
+=head2 new
+
+Creates a new instance. Accepts the following arguments:
+
+=over 4
+
+=item verbose
+
+Enable verbose output.
+
+=back
+
+=cut 
 
 sub new {
     my ($class, %args) = @_;
@@ -25,6 +68,11 @@ sub new {
     return $self;
 }
 
+=head2 analyze(@modules)
+
+Analyzes the provided modules. Returns an array reference of unsupported modules.
+
+=cut
 
 sub analyze {
 	my ($self, @modules) = @_;
@@ -161,49 +209,10 @@ sub _get_last_release_date {
 
 __END__
 
-=head1 NAME
-
-CPAN::UnsupportedFinder - Identify unsupported or poorly maintained CPAN modules.
-
-=head1 SYNOPSIS
-
-  use CPAN::UnsupportedFinder;
-
-  my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
-  my $results = $finder->analyze('Some::Module', 'Another::Module');
-
-  for my $module (@$results) {
-	  print "Module: $module->{module}\n";
-	  print "Failure Rate: $module->{failure_rate}\n";
-	  print "Last Update: $module->{last_update}\n";
-  }
-
-=head1 DESCRIPTION
-
-CPAN::UnsupportedFinder analyzes CPAN modules for test results and maintenance status, flagging unsupported or poorly maintained distributions.
-
-=head1 METHODS
-
-=head2 new
-
-Creates a new instance. Accepts the following arguments:
-
-=over 4
-
-=item verbose
-
-Enable verbose output.
-
-=back
-
-=head2 analyze(@modules)
-
-Analyzes the provided modules. Returns an array reference of unsupported modules.
-
 =head1 AUTHOR
 
-Your Name <your.email@example.com>
+Nigel Horne <njh@bandsman.co.uk>
 
 =head1 LICENSE
 
-This module is licensed under the same terms as Perl itself.
+This program is released under the following licence: GPL2

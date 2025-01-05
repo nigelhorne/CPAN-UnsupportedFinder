@@ -5,7 +5,8 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  # workflow_dispatch:
+  pull_request:
 
 jobs:
   run-cpan-check:
@@ -19,7 +20,7 @@ jobs:
         uses: shogo82148/actions-setup-perl@v1
         with:
           # Set the desired Perl version
-          perl-version: '5.32'
+          perl-version: '5.40'
 
       - name: Install dependencies
         run: |
@@ -28,7 +29,7 @@ jobs:
       - name: Run Unsupported Modules Analysis
         run: |
           mkdir -p reports
-          perl -MCPAN::UnsupportedFinder -e '
+          perl -Ilib -MCPAN::UnsupportedFinder -e '
             my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
             my $results = $finder->analyze("Test::MockModule", "Old::Unused::Module");
             my $json_report = $finder->output_results($results, "json");
@@ -45,7 +46,7 @@ jobs:
 
       - name: Generate HTML Report
         run: |
-          perl -MCPAN::UnsupportedFinder -e '
+          perl -Ilib -MCPAN::UnsupportedFinder -e '
             my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
             my $results = $finder->analyze("Test::MockModule", "Old::Unused::Module");
             my $html_report = $finder->output_results($results, "html");
