@@ -3,8 +3,8 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 my $dist = {
-		COMPRESS => 'gzip -9f', # Compress tarball using gzip
-		SUFFIX => 'gz',	   # File suffix for tarball
+	COMPRESS => 'gzip -9f',	# Compress tarball using gzip
+	SUFFIX => 'gz',	# File suffix for tarball
 };
 
 if($^O eq 'darwin') {
@@ -13,17 +13,17 @@ if($^O eq 'darwin') {
 
 WriteMakefile(
 	NAME => 'CPAN::UnsupportedFinder',
-	VERSION_FROM => 'lib/CPAN/UnsupportedFinder.pm', # Version extracted from your module
+	VERSION_FROM => 'lib/CPAN/UnsupportedFinder.pm', # finds $VERSION in the module
 	AUTHOR => 'Nigel Horne <njh@bandsman.co.uk>',
 	ABSTRACT => 'Identifies unsupported or poorly maintained CPAN modules by analyzing CPAN Testers data and release info.',
 	LICENSE => 'perl',
 	PREREQ_PM => {
-	'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
+		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
 		'HTTP::Tiny' => 0,
-	'JSON' => 0,
-	'Carp' => 0,
-	'Log::Log4perl' => 0,
-	'Scalar::Util' => 0,
+		'JSON' => 0,
+		'Carp' => 0,
+		'Log::Log4perl' => 0,
+		'Scalar::Util' => 0,
 	},
 	META_MERGE => {
 		resources => {
