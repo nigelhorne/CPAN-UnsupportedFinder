@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 
 use lib 'lib';
+use strict;
+use warnings;
 
 use CPAN::UnsupportedFinder;
 
@@ -8,9 +10,9 @@ my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
 my $results = $finder->analyze('CGI-Info', 'Test-MockModule', 'Old-Unused-Module');
 
 for my $module (@$results) {
-    print "Unsupported Module: $module->{module}\n";
-    print "Failure Rate: $module->{failure_rate}\n";
-    print "Last Update: $module->{last_update}\n";
+	print "Unsupported Module: $module->{module}\n";
+	print "Failure Rate: $module->{failure_rate}\n";
+	print "Last Update: $module->{last_update}\n";
 }
 
 # Output results in JSON for CI
