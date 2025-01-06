@@ -6,7 +6,7 @@ use warnings;
 use Carp;
 use HTTP::Tiny;
 use Log::Log4perl;
-use JSON;
+use JSON::MaybeXS;
 use Scalar::Util;
 
 =head1 NAME

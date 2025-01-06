@@ -20,7 +20,7 @@ WriteMakefile(
 	PREREQ_PM => {
 		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
 		'HTTP::Tiny' => 0,
-		'JSON' => 0,
+		'JSON::MaybeXS' => 0,
 		'Carp' => 0,
 		'Log::Log4perl' => 0,
 		'Scalar::Util' => 0,
