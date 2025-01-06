@@ -46,6 +46,33 @@ Creates a new instance. Accepts the following arguments:
 
 Analyzes the provided modules. Returns an array reference of unsupported modules.
 
+## output\_results
+
+    $report = $object->output_results($results, $format);
+
+Generates a report in the specified format.
+
+- $results (ArrayRef)
+
+    An array reference containing hashrefs with information about modules (module name, failure rate, last update)
+    as created by the analyze() method.
+
+- $format (String)
+
+    A string indicating the desired format for the report. Can be one of the following:
+
+    - 'text' (default)
+
+        Generates a plain text report.
+
+    - 'html'
+
+        Generates an HTML report.
+
+    - 'json'
+
+        Generates a JSON report.
+
 # AUTHOR
 
 Nigel Horne <njh@bandsman.co.uk>

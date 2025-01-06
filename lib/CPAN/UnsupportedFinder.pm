@@ -128,6 +128,43 @@ sub analyze {
 	return \@results;
 }
 
+=head2 output_results
+
+  $report = $object->output_results($results, $format);
+
+Generates a report in the specified format.
+
+=over 4
+
+=item * $results (ArrayRef)
+
+An array reference containing hashrefs with information about modules (module name, failure rate, last update)
+as created by the analyze() method.
+
+=item * $format (String)
+
+A string indicating the desired format for the report. Can be one of the following:
+
+=over 4
+
+=item 'text' (default)
+
+Generates a plain text report.
+
+=item 'html'
+
+Generates an HTML report.
+
+=item 'json'
+
+Generates a JSON report.
+
+=back
+
+=back
+
+=cut
+
 sub output_results {
 	my ($self, $results, $format) = @_;
 	$format ||= 'text'; # Default to plain text

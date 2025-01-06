@@ -7,11 +7,11 @@ use Test::Most;
 use Test::HTML::Lint;
 use Test::JSON;
 
-use Test::RequiresInternet ('fastapi.metacpan.org' => 443, 'api.cpantesters.org' => 443);
+use Test::RequiresInternet ('fastapi.metacpan.org' => 'https', 'api.cpantesters.org' => 'https');
 
 BEGIN {
-	plan skip_all => 'NO_NETWORK_TESTING set' if $ENV{'NO_NETWORK_TESTING'};
-	plan tests => 11;
+	plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
+	plan(tests => 11);
 	use_ok('CPAN::UnsupportedFinder')
 }
 
