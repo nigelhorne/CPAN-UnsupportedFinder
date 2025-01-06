@@ -61,7 +61,7 @@ CPAN testers URL, detaults to L<https://api.cpantesters.org/api/v1>
 
 =back
 
-=cut 
+=cut
 
 sub new {
 	my $class = shift;
@@ -91,9 +91,9 @@ sub new {
 	}
 
 	my $self = {
-		api_url	=> 'https://fastapi.metacpan.org/v1',
+		api_url => 'https://fastapi.metacpan.org/v1',
 		cpan_testers => 'https://api.cpantesters.org/api/v1',
-		verbose	=> 0,
+		verbose => 0,
 		%args
 	};
 
@@ -118,7 +118,7 @@ sub analyze {
 	for my $module (@modules) {
 		$self->{logger}->debug('Analyzing module');
 
-		my $test_data	= $self->_fetch_testers_data($module);
+		my $test_data = $self->_fetch_testers_data($module);
 		my $release_data = $self->_fetch_release_data($module);
 
 		my $unsupported = $self->_evaluate_support($module, $test_data, $release_data);
@@ -214,7 +214,7 @@ sub _evaluate_support {
 
 	if($failure_rate > 0.5 || !$last_update || $last_update lt '2022-01-01') {
 		return {
-			module	=> $module,
+			module => $module,
 			failure_rate => $failure_rate,
 			last_update => $last_update || 'Unknown',
 			reverse_deps => $reverse_deps->{total} || 0,
@@ -229,7 +229,7 @@ sub _calculate_failure_rate {
 	return 0 unless $test_data && $test_data->{results};
 
 	my $total_tests = $test_data->{results}{total};
-	my $failures	= $test_data->{results}{fail};
+	my $failures = $test_data->{results}{fail};
 
 	return $total_tests ? $failures / $total_tests : 1;
 }

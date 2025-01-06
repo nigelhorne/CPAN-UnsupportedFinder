@@ -9,3 +9,5 @@ README.md
 t/10-compile.t
 t/20-new.t
 t/30-basics.t
+t/eof.t
+t/eol.t
