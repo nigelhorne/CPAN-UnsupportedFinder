@@ -1,6 +1,6 @@
 Revision history for CPAN-UnsupportedFinder
 
-0.03
+0.03	Mon Jan  6 09:53:06 EST 2025
 	Allow URLs to be overridden in the constructor
 	Added more tests
 	Renamed bin as examples
