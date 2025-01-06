@@ -136,26 +136,26 @@ Generates a report in the specified format.
 
 =over 4
 
-=item * $results (ArrayRef)
+=item * C<$results> (ArrayRef)
 
 An array reference containing hashrefs with information about modules (module name, failure rate, last update)
 as created by the analyze() method.
 
-=item * $format (String)
+=item * C<$format> (String)
 
 A string indicating the desired format for the report. Can be one of the following:
 
 =over 4
 
-=item 'text' (default)
+=item C<text> (default)
 
 Generates a plain text report.
 
-=item 'html'
+=item C<html>
 
 Generates an HTML report.
 
-=item 'json'
+=item C<json>
 
 Generates a JSON report.
 
