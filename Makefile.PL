@@ -38,6 +38,7 @@ WriteMakefile(
         },
     },
     TEST_REQUIRES => {
+	'Test::Compile' => 0,
 	'Test::HTML::Lint' => 0,
 	'Test::JSON' => 0,
         'Test::Most' => 0,
