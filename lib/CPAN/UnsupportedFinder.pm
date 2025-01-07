@@ -234,16 +234,14 @@ sub _fetch_data {
 
 	$self->{logger}->debug("Fetching data from $url");
 
-	my $http = HTTP::Tiny->new;
-	my $response = $http->get($url);
+	my $response = HTTP::Tiny->new()->get($url);
 
 	if($response->{success}) {
 		$self->{logger}->debug("Data fetched successfully from $url");
-		return decode_json($response->{content});
-	} else {
-		$self->{logger}->error("Failed to fetch data from $url: $response->{status}");
-		return;
+		return eval { decode_json($response->{content}) };
 	}
+	$self->{logger}->error("Failed to fetch data from $url: $response->{status}");
+	return;
 }
 
 sub _fetch_reverse_dependencies {
@@ -342,17 +340,10 @@ sub _get_last_release_date {
 sub _has_unsupported_dependencies {
 	my ($self, $module) = @_;
 
-	my $ua = HTTP::Tiny->new();
 	my $url = "https://fastapi.metacpan.org/v1/release/$module";
 
-	my $response = $ua->get($url);
-	if (!$response->{success}) {
-		$self->{'logger'}->warn("Failed to fetch MetaCPAN data for $module: $response->{status} $response->{reason}");
-		return 0;
-	}
-
-	my $release_data = eval { decode_json($response->{content}) };
-	if (!$release_data) {
+	my $release_data = $self->_fetch_data($url);
+	if(!$release_data) {
 		$self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
 		return 0;
 	}
@@ -377,16 +368,10 @@ sub _has_unsupported_dependencies {
 sub _check_module_status {
 	my ($self, $module) = @_;
 
-	my $ua = HTTP::Tiny->new();
 	my $url = "https://fastapi.metacpan.org/v1/module/$module";
 
-	my $response = $ua->get($url);
-	if (!$response->{success}) {
-		$self->{'logger'}->warn("Failed to fetch MetaCPAN status for $module: $response->{status} $response->{reason}");
-		return {};
-	}
-
-	my $module_data = eval { decode_json($response->{content}) };
+	my $module_data = $self->_fetch_data($url);
+	# my $module_data = eval { decode_json($response->{content}) };
 	if (!$module_data) {
 		$self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
 		return {};

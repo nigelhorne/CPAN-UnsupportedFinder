@@ -1,5 +1,8 @@
 Revision history for CPAN-UnsupportedFinder
 
+0.05
+	Call _fetch_data rather than HTTP::Tiny directly
+
 0.04	Mon Jan  6 22:08:23 EST 2025
 	Documented the output_results() method
 	Use JSON::MaybeXS instead of JSON
