@@ -8,7 +8,7 @@ CPAN::UnsupportedFinder analyzes CPAN modules for test results and maintenance s
 
 # VERSION
 
-Version 0.03
+Version 0.04
 
 # SYNOPSIS
 

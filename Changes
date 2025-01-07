@@ -1,6 +1,6 @@
 Revision history for CPAN-UnsupportedFinder
 
-0.04
+0.04	Mon Jan  6 22:08:23 EST 2025
 	Documented the output_results() method
 	Use JSON::MaybeXS instead of JSON
 	Flag modules with no recent test results in the last six months

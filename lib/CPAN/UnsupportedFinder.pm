@@ -21,11 +21,11 @@ CPAN::UnsupportedFinder analyzes CPAN modules for test results and maintenance s
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -269,6 +269,7 @@ sub _evaluate_support {
 
 	my $failure_rate = $self->_calculate_failure_rate($test_data);
 	my $last_update = $self->_get_last_release_date($release_data) || 'Unknown';
+
 	# Reverse Dependencies: Modules with many reverse dependencies have higher priority for support.
 	my $reverse_deps = $self->_fetch_reverse_dependencies($module);
 
