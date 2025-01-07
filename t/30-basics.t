@@ -11,7 +11,7 @@ use Test::RequiresInternet ('fastapi.metacpan.org' => 'https', 'api.cpantesters.
 
 BEGIN {
 	plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
-	plan(tests => 20);
+	plan(tests => 22);
 	use_ok('CPAN::UnsupportedFinder')
 }
 
@@ -29,16 +29,14 @@ my $results = $finder->analyze(@modules);
 ok(ref($results) eq 'ARRAY', 'analyze returns an arrayref');
 
 # Test the content of the returned arrayref (assuming it's structured correctly)
-foreach my $module (@$results) {
-	ok(exists $module->{module}, 'Module key exists');
-	ok(exists $module->{failure_rate}, 'Failure rate key exists');
-	ok(exists $module->{last_update}, 'Last update key exists');
-	ok(exists $module->{recent_tests}, 'Recent tests key exists');
-	ok(exists $module->{reverse_deps}, 'Reverse_deps tests key exists');
+foreach my $module (@{$results}) {
+	foreach my $key('module', 'failure_rate', 'last_update', 'recent_tests', 'reverse_deps', 'has_unsupported_deps') {
+		ok(exists($module->{$key}), "$key exists");
+	}
 }
 
 # Test that the failure rate calculation is between 0 and 1
-foreach my $module (@$results) {
+foreach my $module (@{$results}) {
 	ok($module->{failure_rate} >= 0 && $module->{failure_rate} <= 1, 'Failure rate is between 0 and 1');
 }
 

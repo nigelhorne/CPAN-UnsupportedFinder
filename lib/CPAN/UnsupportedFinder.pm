@@ -1,5 +1,7 @@
 package CPAN::UnsupportedFinder;
 
+# FIXME: magic dates should be configurable
+
 use strict;
 use warnings;
 
@@ -256,26 +258,27 @@ sub _evaluate_support {
 	# Check if there are any test results in the last 6 months
 	my $has_recent_tests = $self->_has_recent_tests($test_data);
 
-	# TODO: Dependency Status: Use MetaCPAN to check if the module depends on deprecated or unsupported distributions.
-
-	# FIXME: magic dates should be configurable
+	# Check if the module has dependencies marked as deprecated or unsupported
+	my $has_unsupported_dependencies = $self->_has_unsupported_dependencies($module);
 
 	# Check if the module is unsupported based on the criteria
 	# Flag module as unsupported if:
 	# - High failure rate (> 50%)
 	# - No recent updates
 	# - No recent test results in the last 6 months
-	if($failure_rate > 0.5 || (!$last_update || $last_update lt '2022-01-01') || !$has_recent_tests) {
+	# - Has unsupported dependencies
+	if($failure_rate > 0.5 || (!$last_update || $last_update lt '2022-01-01') || !$has_recent_tests || $has_unsupported_dependencies) {
 		return {
 			module       => $module,
 			failure_rate => $failure_rate,
 			last_update  => $last_update,
 			recent_tests => $has_recent_tests ? 'Yes' : 'No',
 			reverse_deps => $reverse_deps->{total} || 0,
+			has_unsupported_deps => $has_unsupported_dependencies ? 'Yes' : 'No',
 		};
 	}
 
-	return;
+	return; # Module is considered supported
 }
 
 # Helper function to calculate the date six months ago
@@ -316,6 +319,66 @@ sub _get_last_release_date {
 
 	return $release_data->{hits}{hits}[0]{_source}{date};
 }
+
+sub _has_unsupported_dependencies {
+    my ($self, $module) = @_;
+
+    my $ua = HTTP::Tiny->new();
+    my $url = "https://fastapi.metacpan.org/v1/release/$module";
+    
+    my $response = $ua->get($url);
+    if (!$response->{success}) {
+        $self->{'logger'}->warn("Failed to fetch MetaCPAN data for $module: $response->{status} $response->{reason}");
+        return 0;
+    }
+
+    my $release_data = eval { decode_json($response->{content}) };
+    if (!$release_data) {
+        $self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
+        return 0;
+    }
+
+    # Extract dependencies
+    my $dependencies = $release_data->{dependency} || [];
+    foreach my $dependency (@$dependencies) {
+        # Skip if the dependency is marked as optional
+        next if $dependency->{phase} && $dependency->{phase} eq 'develop';
+
+        my $dep_module = $dependency->{module};
+        my $dep_status = $self->_check_module_status($dep_module);
+
+        if ($dep_status->{deprecated} || $dep_status->{backpan_only}) {
+            return 1; # Found an unsupported dependency
+        }
+    }
+
+    return 0; # No unsupported dependencies found
+}
+
+sub _check_module_status {
+    my ($self, $module) = @_;
+
+    my $ua = HTTP::Tiny->new();
+    my $url = "https://fastapi.metacpan.org/v1/module/$module";
+
+    my $response = $ua->get($url);
+    if (!$response->{success}) {
+        $self->{'logger'}->warn("Failed to fetch MetaCPAN status for $module: $response->{status} $response->{reason}");
+        return {};
+    }
+
+    my $module_data = eval { decode_json($response->{content}) };
+    if (!$module_data) {
+        $self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
+        return {};
+    }
+
+    return {
+        deprecated   => $module_data->{status} && $module_data->{status} eq 'deprecated',
+        backpan_only => $module_data->{maturity} && $module_data->{maturity} eq 'backpan',
+    };
+}
+
 
 1;
 
