@@ -197,7 +197,7 @@ sub _generate_html_report {
 
 	my $html = '<html><head><title>Unsupported Modules Report</title></head><body><h1>Unsupported Modules Report</h1><ul>';
 
-	for my $module (@$results) {
+	for my $module (@{$results}) {
 		$html .= "<li><strong>$module->{module}</strong>:<br>";
 		$html .= "Failure Rate: $module->{failure_rate}<br>";
 		$html .= "Last Update: $module->{last_update}<br></li>";
@@ -209,18 +209,21 @@ sub _generate_html_report {
 
 sub _fetch_testers_data {
 	my ($self, $module) = @_;
+
 	my $url = "$self->{cpan_testers}/summary/$module";
 	return $self->_fetch_data($url);
 }
 
 sub _fetch_release_data {
 	my ($self, $module) = @_;
+
 	my $url = "$self->{api_url}/release/_search?q=distribution:$module&size=1&sort=date:desc";
 	return $self->_fetch_data($url);
 }
 
 sub _fetch_data {
 	my ($self, $url) = @_;
+
 	$self->{logger}->debug("Fetching data from $url");
 
 	my $http = HTTP::Tiny->new;
@@ -238,6 +241,7 @@ sub _fetch_data {
 sub _fetch_reverse_dependencies {
 	my ($self, $module) = @_;
 	my $url = "$self->{api_url}/reverse_dependencies/$module";
+
 	return $self->_fetch_data($url);
 }
 
@@ -245,21 +249,56 @@ sub _evaluate_support {
 	my ($self, $module, $test_data, $release_data) = @_;
 
 	my $failure_rate = $self->_calculate_failure_rate($test_data);
-	my $last_update = $self->_get_last_release_date($release_data);
+	my $last_update = $self->_get_last_release_date($release_data) || 'Unknown';
 	# Reverse Dependencies: Modules with many reverse dependencies have higher priority for support.
 	my $reverse_deps = $self->_fetch_reverse_dependencies($module);
 
-	if($failure_rate > 0.5 || !$last_update || $last_update lt '2022-01-01') {
+	# Check if there are any test results in the last 6 months
+	my $has_recent_tests = $self->_has_recent_tests($test_data);
+
+	# TODO: Dependency Status: Use MetaCPAN to check if the module depends on deprecated or unsupported distributions.
+
+	# FIXME: magic dates should be configurable
+
+	# Check if the module is unsupported based on the criteria
+	# Flag module as unsupported if:
+	# - High failure rate (> 50%)
+	# - No recent updates
+	# - No recent test results in the last 6 months
+	if($failure_rate > 0.5 || (!$last_update || $last_update lt '2022-01-01') || !$has_recent_tests) {
 		return {
-			module => $module,
+			module       => $module,
 			failure_rate => $failure_rate,
-			last_update => $last_update || 'Unknown',
+			last_update  => $last_update,
+			recent_tests => $has_recent_tests ? 'Yes' : 'No',
 			reverse_deps => $reverse_deps->{total} || 0,
 		};
 	}
 
 	return;
 }
+
+# Helper function to calculate the date six months ago
+sub _six_months_ago {
+    my @time = localtime(time - 6 * 30 * 24 * 60 * 60); # Approximate six months in seconds
+    return sprintf "%04d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
+}
+
+sub _has_recent_tests {
+    my ($self, $test_data) = @_;
+
+    # Assume $test_data contains test reports with a timestamp field
+    my $six_months_ago = time - (6 * 30 * 24 * 60 * 60); # Roughly 6 months in seconds
+
+    foreach my $test (@$test_data) {
+        if ($test->{timestamp} && $test->{timestamp} > $six_months_ago) {
+            return 1; # Recent test found
+        }
+    }
+
+    return 0; # No recent tests found
+}
+
 
 sub _calculate_failure_rate {
 	my ($self, $test_data) = @_;

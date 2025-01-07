@@ -11,7 +11,7 @@ use Test::RequiresInternet ('fastapi.metacpan.org' => 'https', 'api.cpantesters.
 
 BEGIN {
 	plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
-	plan(tests => 11);
+	plan(tests => 20);
 	use_ok('CPAN::UnsupportedFinder')
 }
 
@@ -33,6 +33,8 @@ foreach my $module (@$results) {
 	ok(exists $module->{module}, 'Module key exists');
 	ok(exists $module->{failure_rate}, 'Failure rate key exists');
 	ok(exists $module->{last_update}, 'Last update key exists');
+	ok(exists $module->{recent_tests}, 'Recent tests key exists');
+	ok(exists $module->{reverse_deps}, 'Reverse_deps tests key exists');
 }
 
 # Test that the failure rate calculation is between 0 and 1
@@ -42,8 +44,11 @@ foreach my $module (@$results) {
 
 # Test that the last update is a valid date (assuming you expect a YYYY-MM-DD format)
 foreach my $module (@$results) {
-	# ok($module->{last_update} =~ /^\d{4}-\d{2}-\d{2}$/, 'Last update is a valid date' );
-	cmp_ok($module->{'last_update'}, 'eq', 'Unknown', 'Unknown module has no valid date');
+	if($module->{'module'} eq 'Old-Unused-Module') {
+		cmp_ok($module->{'last_update'}, 'eq', 'Unknown', 'Unknown module has no valid date');
+	} else {
+		like($module->{'last_update'}, qr/^\d{4}-\d{2}-\d{2}/, 'Last update is a valid date');
+	}
 }
 
 # Test the output format methods
