@@ -14,5 +14,6 @@ t/comment-spelling.t
 t/eof.t
 t/eol.t
 t/manifest.t
+t/noplan.t
 t/pod-coverage.t
 t/pod.t

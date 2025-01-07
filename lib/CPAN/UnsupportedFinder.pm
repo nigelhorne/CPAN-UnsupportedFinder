@@ -29,17 +29,17 @@ our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
-  use CPAN::UnsupportedFinder;
+    use CPAN::UnsupportedFinder;
 
-  # Note use of hyphens not colons
-  my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
-  my $results = $finder->analyze('Some-Module', 'Another-Module');
+    # Note use of hyphens not colons
+    my $finder = CPAN::UnsupportedFinder->new(verbose => 1);
+    my $results = $finder->analyze('Some-Module', 'Another-Module');
 
-  for my $module (@$results) {
+    for my $module (@$results) {
 	  print "Module: $module->{module}\n";
 	  print "Failure Rate: $module->{failure_rate}\n";
 	  print "Last Update: $module->{last_update}\n";
-  }
+    }
 
 =head1 METHODS
 
@@ -60,6 +60,10 @@ metacpan URL, defaults to L<https://fastapi.metacpan.org/v1>
 =item * cpan_testers
 
 CPAN testers URL, detaults to L<https://api.cpantesters.org/api/v1>
+
+=item * logger
+
+Where to log messages, defaults to L<Log::Log4perl>
 
 =back
 
@@ -99,8 +103,10 @@ sub new {
 		%args
 	};
 
-	Log::Log4perl->easy_init($self->{verbose} ? $Log::Log4perl::DEBUG : $Log::Log4perl::ERROR);
-	$self->{logger} = Log::Log4perl->get_logger();
+	if(!defined($self->{logger})) {
+		Log::Log4perl->easy_init($self->{verbose} ? $Log::Log4perl::DEBUG : $Log::Log4perl::ERROR);
+		$self->{logger} = Log::Log4perl->get_logger();
+	}
 
 	# Return the blessed object
 	return bless $self, $class;
@@ -132,7 +138,7 @@ sub analyze {
 
 =head2 output_results
 
-  $report = $object->output_results($results, $format);
+    $report = $object->output_results($results, $format);
 
 Generates a report in the specified format.
 
@@ -247,6 +253,17 @@ sub _fetch_reverse_dependencies {
 	return $self->_fetch_data($url);
 }
 
+# Evaluate the support status of a module.
+
+# Evaluates the module's failure rate, last update date, test history, and dependencies.
+
+# $module: The name of the module being evaluated.
+# $test_data: Test results data for the module.
+# $release_data: Release metadata for the module.
+
+# Returns a hashref containing the module's evaluation details if it's flagged as unsupported,
+# undef if the module is considered supported.
+
 sub _evaluate_support {
 	my ($self, $module, $test_data, $release_data) = @_;
 
@@ -267,11 +284,11 @@ sub _evaluate_support {
 	# - No recent updates
 	# - No recent test results in the last 6 months
 	# - Has unsupported dependencies
-	if($failure_rate > 0.5 || (!$last_update || $last_update lt '2022-01-01') || !$has_recent_tests || $has_unsupported_dependencies) {
+	if(($failure_rate > 0.5) || (!$last_update || $last_update lt '2022-01-01') || !$has_recent_tests || $has_unsupported_dependencies) {
 		return {
-			module       => $module,
+			module	=> $module,
 			failure_rate => $failure_rate,
-			last_update  => $last_update,
+			last_update => $last_update,
 			recent_tests => $has_recent_tests ? 'Yes' : 'No',
 			reverse_deps => $reverse_deps->{total} || 0,
 			has_unsupported_deps => $has_unsupported_dependencies ? 'Yes' : 'No',
@@ -283,28 +300,29 @@ sub _evaluate_support {
 
 # Helper function to calculate the date six months ago
 sub _six_months_ago {
-    my @time = localtime(time - 6 * 30 * 24 * 60 * 60); # Approximate six months in seconds
-    return sprintf "%04d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
+	my @time = localtime(time - 6 * 30 * 24 * 60 * 60);	# Approximate six months in seconds
+	return sprintf "%04d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
 }
 
 sub _has_recent_tests {
-    my ($self, $test_data) = @_;
+	my ($self, $test_data) = @_;
 
-    # Assume $test_data contains test reports with a timestamp field
-    my $six_months_ago = time - (6 * 30 * 24 * 60 * 60); # Roughly 6 months in seconds
+	# Assume $test_data contains test reports with a timestamp field
+	my $six_months_ago = time - (6 * 30 * 24 * 60 * 60); # Roughly 6 months in seconds
 
-    foreach my $test (@$test_data) {
-        if ($test->{timestamp} && $test->{timestamp} > $six_months_ago) {
-            return 1; # Recent test found
-        }
-    }
+	foreach my $test (@$test_data) {
+		if ($test->{timestamp} && $test->{timestamp} > $six_months_ago) {
+			return 1;	# Recent test found
+		}
+	}
 
-    return 0; # No recent tests found
+	return 0;	# No recent tests found
 }
 
 
 sub _calculate_failure_rate {
 	my ($self, $test_data) = @_;
+
 	return 0 unless $test_data && $test_data->{results};
 
 	my $total_tests = $test_data->{results}{total};
@@ -321,64 +339,63 @@ sub _get_last_release_date {
 }
 
 sub _has_unsupported_dependencies {
-    my ($self, $module) = @_;
+	my ($self, $module) = @_;
 
-    my $ua = HTTP::Tiny->new();
-    my $url = "https://fastapi.metacpan.org/v1/release/$module";
-    
-    my $response = $ua->get($url);
-    if (!$response->{success}) {
-        $self->{'logger'}->warn("Failed to fetch MetaCPAN data for $module: $response->{status} $response->{reason}");
-        return 0;
-    }
+	my $ua = HTTP::Tiny->new();
+	my $url = "https://fastapi.metacpan.org/v1/release/$module";
 
-    my $release_data = eval { decode_json($response->{content}) };
-    if (!$release_data) {
-        $self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
-        return 0;
-    }
+	my $response = $ua->get($url);
+	if (!$response->{success}) {
+		$self->{'logger'}->warn("Failed to fetch MetaCPAN data for $module: $response->{status} $response->{reason}");
+		return 0;
+	}
 
-    # Extract dependencies
-    my $dependencies = $release_data->{dependency} || [];
-    foreach my $dependency (@$dependencies) {
-        # Skip if the dependency is marked as optional
-        next if $dependency->{phase} && $dependency->{phase} eq 'develop';
+	my $release_data = eval { decode_json($response->{content}) };
+	if (!$release_data) {
+		$self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
+		return 0;
+	}
 
-        my $dep_module = $dependency->{module};
-        my $dep_status = $self->_check_module_status($dep_module);
+	# Extract dependencies
+	my $dependencies = $release_data->{dependency} || [];
+	foreach my $dependency (@$dependencies) {
+		# Skip if the dependency is marked as optional
+		next if $dependency->{phase} && $dependency->{phase} eq 'develop';
 
-        if ($dep_status->{deprecated} || $dep_status->{backpan_only}) {
-            return 1; # Found an unsupported dependency
-        }
-    }
+		my $dep_module = $dependency->{module};
+		my $dep_status = $self->_check_module_status($dep_module);
 
-    return 0; # No unsupported dependencies found
+		if ($dep_status->{deprecated} || $dep_status->{backpan_only}) {
+			return 1; # Found an unsupported dependency
+		}
+	}
+
+	return 0; # No unsupported dependencies found
 }
 
 sub _check_module_status {
-    my ($self, $module) = @_;
+	my ($self, $module) = @_;
 
-    my $ua = HTTP::Tiny->new();
-    my $url = "https://fastapi.metacpan.org/v1/module/$module";
+	my $ua = HTTP::Tiny->new();
+	my $url = "https://fastapi.metacpan.org/v1/module/$module";
 
-    my $response = $ua->get($url);
-    if (!$response->{success}) {
-        $self->{'logger'}->warn("Failed to fetch MetaCPAN status for $module: $response->{status} $response->{reason}");
-        return {};
-    }
+	my $response = $ua->get($url);
+	if (!$response->{success}) {
+		$self->{'logger'}->warn("Failed to fetch MetaCPAN status for $module: $response->{status} $response->{reason}");
+		return {};
+	}
 
-    my $module_data = eval { decode_json($response->{content}) };
-    if (!$module_data) {
-        $self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
-        return {};
-    }
+	my $module_data = eval { decode_json($response->{content}) };
+	if (!$module_data) {
+		$self->{'logger'}->warn("Failed to parse MetaCPAN response for $module");
+		return {};
+	}
 
-    return {
-        deprecated   => $module_data->{status} && $module_data->{status} eq 'deprecated',
-        backpan_only => $module_data->{maturity} && $module_data->{maturity} eq 'backpan',
-    };
+	return {
+		deprecated => $module_data->{status} && $module_data->{status} eq 'deprecated',
+		backpan_only => $module_data->{maturity} && $module_data->{maturity} eq 'backpan',
+	};
 }
-
 
 1;
 

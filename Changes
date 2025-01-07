@@ -5,6 +5,7 @@ Revision history for CPAN-UnsupportedFinder
 	Use JSON::MaybeXS instead of JSON
 	Flag modules with no recent test results in the last six months
 	Flag modules with unsupported dependencies
+	Allow logger to be passed in
 
 0.03	Mon Jan  6 09:53:06 EST 2025
 	Allow URLs to be overridden in the constructor

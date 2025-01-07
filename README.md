@@ -19,9 +19,9 @@ Version 0.03
     my $results = $finder->analyze('Some-Module', 'Another-Module');
 
     for my $module (@$results) {
-            print "Module: $module->{module}\n";
-            print "Failure Rate: $module->{failure_rate}\n";
-            print "Last Update: $module->{last_update}\n";
+          print "Module: $module->{module}\n";
+          print "Failure Rate: $module->{failure_rate}\n";
+          print "Last Update: $module->{last_update}\n";
     }
 
 # METHODS
@@ -42,6 +42,10 @@ Creates a new instance. Accepts the following arguments:
 
     CPAN testers URL, detaults to [https://api.cpantesters.org/api/v1](https://api.cpantesters.org/api/v1)
 
+- logger
+
+    Where to log messages, defaults to [Log::Log4perl](https://metacpan.org/pod/Log%3A%3ALog4perl)
+
 ## analyze(@modules)
 
 Analyzes the provided modules. Returns an array reference of unsupported modules.
@@ -52,24 +56,24 @@ Analyzes the provided modules. Returns an array reference of unsupported modules
 
 Generates a report in the specified format.
 
-- $results (ArrayRef)
+- `$results` (ArrayRef)
 
     An array reference containing hashrefs with information about modules (module name, failure rate, last update)
     as created by the analyze() method.
 
-- $format (String)
+- `$format` (String)
 
     A string indicating the desired format for the report. Can be one of the following:
 
-    - 'text' (default)
+    - `text` (default)
 
         Generates a plain text report.
 
-    - 'html'
+    - `html`
 
         Generates an HTML report.
 
-    - 'json'
+    - `json`
 
         Generates a JSON report.
 
