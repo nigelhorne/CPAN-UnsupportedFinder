@@ -6,12 +6,12 @@ use warnings;
 use Test::Most;
 use Test::HTML::Lint;
 use Test::JSON;
-
 use Test::RequiresInternet ('fastapi.metacpan.org' => 'https', 'api.cpantesters.org' => 'https');
+use Test::Warnings;
 
 BEGIN {
 	plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
-	plan(tests => 22);
+	plan(tests => 23);
 	use_ok('CPAN::UnsupportedFinder')
 }
 
