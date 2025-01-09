@@ -41,7 +41,8 @@ jobs:
           git config --global --add safe.directory /__w/CPAN-UnsupportedFinder/CPAN-UnsupportedFinder
           cover -test
           cover -report coveralls
-          # ./codecov -t ${{ secrets.COVERALLS_TOKEN }} -f cover_db/codecov.json
+          # ./codecov -t ${{ secrets.COVERALLS_REPO_TOKEN }} -f cover_db/codecov.json
         env:
           GITHUB_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           AUTOMATED_TESTING: 1
