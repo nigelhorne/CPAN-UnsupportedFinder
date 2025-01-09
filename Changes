@@ -1,6 +1,6 @@
 Revision history for CPAN-UnsupportedFinder
 
-0.05
+0.05	Thu Jan  9 13:40:41 EST 2025
 	Call _fetch_data rather than HTTP::Tiny directly
 	Use Test::Warnings
 	Added code coverage CI
