@@ -11,7 +11,7 @@ use Test::Warnings;
 
 BEGIN {
 	plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
-	plan(tests => 26);
+	# plan(tests => 26);
 	use_ok('CPAN::UnsupportedFinder')
 }
 
@@ -62,4 +62,7 @@ like($html_report, qr/<html>/, 'Output contains <html> tag for HTML format');
 html_ok($html_report, 'Output is valid HTML');
 
 my $text_report = $finder->output_results($results);
+diag($text_report) if($ENV{'TEST_VERBOSE'});
 like($text_report, qr/Module: Old-Unused-Module/, 'Output contains the module name');
+
+done_testing();

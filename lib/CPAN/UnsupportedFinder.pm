@@ -124,7 +124,7 @@ sub analyze {
 
 	my @results;
 	for my $module (@modules) {
-		$self->{logger}->debug('Analyzing module');
+		$self->{logger}->debug("Analyzing module $module");
 
 		my $test_data = $self->_fetch_testers_data($module);
 		my $release_data = $self->_fetch_release_data($module);
@@ -192,9 +192,11 @@ sub _generate_text_report {
 
 	for my $module (@$results) {
 		$report .= "Module: $module->{module}\n";
-		$report .= "Failure Rate: $module->{failure_rate}\n";
-		$report .= "Last Update: $module->{last_update}\n";
-		$report .= "\n";
+		$report .= "\tFailure Rate: $module->{failure_rate}\n";
+		$report .= "\tLast Update: $module->{last_update}\n";
+		$report .= "\tHas Recent Tests: $module->{recent_tests}\n";
+		$report .= "\tReverse Dependancies: $module->{reverse_deps}\n";
+		$report .= "\tHas Unsupported Dependancies: $module->{has_unsupported_deps}\n";
 	}
 
 	return $report;
@@ -208,7 +210,10 @@ sub _generate_html_report {
 	for my $module (@{$results}) {
 		$html .= "<li><strong>$module->{module}</strong>:<br>";
 		$html .= "Failure Rate: $module->{failure_rate}<br>";
-		$html .= "Last Update: $module->{last_update}<br></li>";
+		$html .= "Last Update: $module->{last_update}<br>";
+		$html .= "Has Recent Tests: $module->{recent_tests}<br>";
+		$html .= "Reverse Dependancies: $module->{reverse_deps}<br>";
+		$html .= "Has Unsupported Dependancies: $module->{has_unsupported_deps}<br></li>";
 	}
 
 	$html .= '</ul></body></html>';
@@ -283,7 +288,7 @@ sub _evaluate_support {
 	# - No recent updates
 	# - No recent test results in the last 6 months
 	# - Has unsupported dependencies
-	if(($failure_rate > 0.5) || (!$last_update || $last_update lt '2022-01-01') || !$has_recent_tests || $has_unsupported_dependencies) {
+	if(($failure_rate > 0.5) || ($last_update eq 'Unknown') || ($last_update lt '2022-01-01') || !$has_recent_tests || $has_unsupported_dependencies) {
 		return {
 			module	=> $module,
 			failure_rate => $failure_rate,
@@ -303,14 +308,21 @@ sub _six_months_ago {
 	return sprintf "%04d-%02d-%02d", $time[5] + 1900, $time[4] + 1, $time[3];
 }
 
-sub _has_recent_tests {
+sub _has_recent_tests
+{
+	# FIXME
+	return 1;	# The API is currently unavailable
+
 	my ($self, $test_data) = @_;
 
 	# Assume $test_data contains test reports with a timestamp field
-	my $six_months_ago = time - (6 * 30 * 24 * 60 * 60); # Roughly 6 months in seconds
+	my $six_months_ago = $self->_six_months_ago();
 
-	foreach my $test (@$test_data) {
-		if ($test->{timestamp} && $test->{timestamp} > $six_months_ago) {
+	foreach my $test(@{$test_data}) {
+		::diag(__LINE__);
+		::diag($test->{timestamp});
+		::diag($six_months_ago);
+		if($test->{timestamp} && ($test->{timestamp} > $six_months_ago)) {
 			return 1;	# Recent test found
 		}
 	}
@@ -390,6 +402,11 @@ __END__
 =head1 AUTHOR
 
 Nigel Horne <njh@bandsman.co.uk>
+
+=head1 BUGS
+
+The cpantesters api, L<https://api.cpantesters.org/>, is currently unavailable,
+so the routine _has_recent_tests() currently always returns 1.
 
 =head1 LICENCE
 
