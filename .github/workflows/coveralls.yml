@@ -1,39 +1,47 @@
 ---
+name: Code coverage - coveralls.io
+
+on:
+  pull_request:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
 
 jobs:
-  ubuntu:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        perl-version: ['5.10', '5.14', '5.20']
-        include:
-          - perl-version: '5.30'
-            os: ubuntu-latest
-            release-test: true
-            coverage: true
-    container: perl:${{ matrix.perl-version }}
+  build:
+    runs-on: ubuntu-latest
+    name: coveralls
+    container:
+      image: perl:stable
     steps:
-      - uses: actions/checkout@v2
-      # do other stuff like installing external deps here
-      - run: cpanm -n --installdeps .
-      - run: perl -V
-      - name: Run release tests
-        # before others as may install useful stuff
-        if: ${{ matrix.release-test }}
-        env:
-          RELEASE_TESTING: 1
+      - uses: actions/checkout@v4
+      # - run: cpanm --quiet --notest --installdeps .
+      # - run: cpanm --quiet --notest App::Yath Devel::Cover Devel::Cover::Report::Coveralls UUID
+      # - run: PERL5OPT="-MDevel::Cover" yath test --qvf t/
+      - name: Install Programs
         run: |
-          cpanm -n --installdeps --with-develop .
-          prove -lr xt
-      - name: Run tests (no coverage)
-        if: ${{ !matrix.coverage }}
-        run: prove -l t
-      - name: Run tests (with coverage)
-        if: ${{ matrix.coverage }}
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          apt-get update
+          apt-get -y upgrade
+          apt-get -y install cpanminus libdevel-cover-perl libmodule-build-perl
+      - name: Install Dependencies
         run: |
-          cpanm -n Devel::Cover::Report::Coveralls
-          cover -test -report Coveralls
+          cpanm --reinstall App::cpanminus
+          cpanm -iqn --installdeps .
+          cpanm --mirror https://cpan.org -iqn Devel::Cover::Report::Coveralls
+      - name: Build module
+        run: |
+          perl Makefile.PL
+          make
+        env:
+          AUTOMATED_TESTING: 1
+      - name: Submit coveralls
+        run: |
+          git config --global --add safe.directory /__w/CPAN-UnsupportedFinder/CPAN-UnsupportedFinder
+          cover -test
+          cover -report coveralls
+          # ./codecov -t ${{ secrets.COVERALLS_TOKEN }} -f cover_db/codecov.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          AUTOMATED_TESTING: 1
