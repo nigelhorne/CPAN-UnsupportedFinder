@@ -17,5 +17,6 @@ t/eol.t
 t/manifest.t
 t/no404s.t
 t/noplan.t
+t/pod-cm.t
 t/pod-coverage.t
 t/pod.t

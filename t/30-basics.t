@@ -11,7 +11,7 @@ use Test::Warnings;
 
 BEGIN {
 	plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
-	plan(tests => 23);
+	plan(tests => 26);
 	use_ok('CPAN::UnsupportedFinder')
 }
 
@@ -23,6 +23,9 @@ ok($finder, 'CPAN::UnsupportedFinder object created');
 
 # Mock module to analyze
 my @modules = ('Test-MockModule', 'Old-Unused-Module');
+
+dies_ok(sub { $finder->analyze() }, 'Modules is a required argument');
+like($@, qr/No modules provided for analysis/);
 
 # Test that the analyze method returns an arrayref
 my $results = $finder->analyze(@modules);
@@ -57,3 +60,6 @@ is_valid_json($json_report, 'Output is valid JSON');
 my $html_report = $finder->output_results($results, 'html');
 like($html_report, qr/<html>/, 'Output contains <html> tag for HTML format');
 html_ok($html_report, 'Output is valid HTML');
+
+my $text_report = $finder->output_results($results);
+like($text_report, qr/Module: Old-Unused-Module/, 'Output contains the module name');

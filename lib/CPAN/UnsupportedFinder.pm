@@ -120,7 +120,7 @@ Analyzes the provided modules. Returns an array reference of unsupported modules
 
 sub analyze {
 	my ($self, @modules) = @_;
-	croak "No modules provided for analysis" unless @modules;
+	croak('No modules provided for analysis') unless(@modules);
 
 	my @results;
 	for my $module (@modules) {
