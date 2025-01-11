@@ -245,12 +245,19 @@ sub _fetch_data {
 		$self->{logger}->debug("Data fetched successfully from $url");
 		return eval { decode_json($response->{content}) };
 	}
+	$self->{logger}->debug("Status = $response->{status}");
+	if(($response->{'status'} != 200) && ($url =~ /::/)) {
+		# Some modules use hyphens as delineators
+		$url =~ s/::/-/g;
+		return $self->_fetch_data($url);
+	}
 	$self->{logger}->error("Failed to fetch data from $url: $response->{status}");
 	return;
 }
 
 sub _fetch_reverse_dependencies {
 	my ($self, $module) = @_;
+
 	my $url = "$self->{api_url}/reverse_dependencies/$module";
 
 	return $self->_fetch_data($url);
@@ -299,7 +306,7 @@ sub _evaluate_support {
 		};
 	}
 
-	return; # Module is considered supported
+	return;	# Module is considered supported
 }
 
 # Helper function to calculate the date six months ago
@@ -331,6 +338,7 @@ sub _has_recent_tests
 }
 
 
+# The API is currently unavailable
 sub _calculate_failure_rate {
 	my ($self, $test_data) = @_;
 
@@ -352,7 +360,7 @@ sub _get_last_release_date {
 sub _has_unsupported_dependencies {
 	my ($self, $module) = @_;
 
-	my $url = "https://fastapi.metacpan.org/v1/release/$module";
+	my $url = "$self->{api_url}/release/$module";
 
 	my $release_data = $self->_fetch_data($url);
 	if(!$release_data) {
@@ -380,7 +388,7 @@ sub _has_unsupported_dependencies {
 sub _check_module_status {
 	my ($self, $module) = @_;
 
-	my $url = "https://fastapi.metacpan.org/v1/module/$module";
+	my $url = "$self->{api_url}/module/$module";
 
 	my $module_data = $self->_fetch_data($url);
 	# my $module_data = eval { decode_json($response->{content}) };
