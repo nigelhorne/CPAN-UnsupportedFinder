@@ -1,6 +1,6 @@
 Revision history for CPAN-UnsupportedFinder
 
-0.06
+0.06	Sat Jan 11 14:18:08 EST 2025
 	Fixed spelling
 	Added examples/all
 	Disable more api.cpantesters.org
