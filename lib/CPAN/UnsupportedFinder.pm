@@ -413,7 +413,7 @@ Nigel Horne <njh@bandsman.co.uk>
 
 =head1 BUGS
 
-The cpantesters api, L<https://api.cpantesters.org/>, is currently unavailable,
+The cpantesters API, L<https://api.cpantesters.org/>, is currently unavailable,
 so the routine _has_recent_tests() currently always returns 1.
 
 =head1 LICENCE
