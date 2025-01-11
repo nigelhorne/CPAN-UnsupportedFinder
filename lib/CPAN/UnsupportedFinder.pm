@@ -85,7 +85,7 @@ sub new {
 
 	if(!defined($class)) {
 		if((scalar keys %args) > 0) {
-			# Using CPAN::UnsupportedFinder->new(), not CPAN::UnsupportedFinder::new()
+			# Using CPAN::UnsupportedFinder::new(), not CPAN::UnsupportedFinder->new()
 			carp(__PACKAGE__, ' use ->new() not ::new() to instantiate');
 			return;
 		}
@@ -190,13 +190,13 @@ sub _generate_text_report {
 	my ($self, $results) = @_;
 	my $report = '';
 
-	for my $module (@$results) {
+	for my $module (@{$results}) {
 		$report .= "Module: $module->{module}\n";
 		$report .= "\tFailure Rate: $module->{failure_rate}\n";
 		$report .= "\tLast Update: $module->{last_update}\n";
 		$report .= "\tHas Recent Tests: $module->{recent_tests}\n";
-		$report .= "\tReverse Dependancies: $module->{reverse_deps}\n";
-		$report .= "\tHas Unsupported Dependancies: $module->{has_unsupported_deps}\n";
+		$report .= "\tReverse Dependencies: $module->{reverse_deps}\n";
+		$report .= "\tHas Unsupported Dependencies: $module->{has_unsupported_deps}\n";
 	}
 
 	return $report;
@@ -212,8 +212,8 @@ sub _generate_html_report {
 		$html .= "Failure Rate: $module->{failure_rate}<br>";
 		$html .= "Last Update: $module->{last_update}<br>";
 		$html .= "Has Recent Tests: $module->{recent_tests}<br>";
-		$html .= "Reverse Dependancies: $module->{reverse_deps}<br>";
-		$html .= "Has Unsupported Dependancies: $module->{has_unsupported_deps}<br></li>";
+		$html .= "Reverse Dependencies: $module->{reverse_deps}<br>";
+		$html .= "Has Unsupported Dependencies: $module->{has_unsupported_deps}<br></li>";
 	}
 
 	$html .= '</ul></body></html>';
