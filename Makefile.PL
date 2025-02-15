@@ -12,10 +12,10 @@ if($^O eq 'darwin') {
 }
 
 WriteMakefile(
+	ABSTRACT_FROM	=> 'lib/CPAN/UnsupportedFinder.pm',
+	AUTHOR => 'Nigel Horne <njh@bandsman.co.uk>',
 	NAME => 'CPAN::UnsupportedFinder',
 	VERSION_FROM => 'lib/CPAN/UnsupportedFinder.pm', # finds $VERSION in the module
-	AUTHOR => 'Nigel Horne <njh@bandsman.co.uk>',
-	ABSTRACT => 'Identifies unsupported or poorly maintained CPAN modules by analyzing CPAN Testers data and release info.',
 	((defined($ExtUtils::MakeMaker::VERSION) && ($ExtUtils::MakeMaker::VERSION >= 6.3002))
 		? ('LICENSE'=> 'GPL')
 		: ()),
