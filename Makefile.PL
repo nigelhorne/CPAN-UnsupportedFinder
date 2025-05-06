@@ -19,7 +19,9 @@ WriteMakefile(
 	((defined($ExtUtils::MakeMaker::VERSION) && ($ExtUtils::MakeMaker::VERSION >= 6.3002))
 		? ('LICENSE'=> 'GPL')
 		: ()),
-	PREREQ_PM => {
+	CONFIGURE_REQUIRES => {
+		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
+	}, PREREQ_PM => {
 		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
 		'HTTP::Tiny' => 0,
 		'JSON::MaybeXS' => 0,
@@ -50,4 +52,5 @@ WriteMakefile(
 		'Test::Warnings' => 0
 	}, dist => $dist,
 	clean => { FILES => 'CPAN-UnsupportedFinder-*' },  # Clean up distribution files
+	MIN_PERL_VERSION	=> '5.008'
 );
