@@ -10,10 +10,26 @@ use Test::RequiresInternet ('fastapi.metacpan.org' => 'https', 'api.cpantesters.
 use Test::Warnings;
 
 BEGIN {
-	plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
 	# plan(tests => 26);
 	use_ok('CPAN::UnsupportedFinder')
 }
+
+# Test for broken smokers that don't set AUTOMATED_TESTING
+if(my $reporter = $ENV{'PERL_CPAN_REPORTER_CONFIG'}) {
+	if($reporter =~ /smoker/i) {
+		diag('AUTOMATED_TESTING added for you') if(!defined($ENV{'AUTOMATED_TESTING'}));
+		$ENV{'AUTOMATED_TESTING'} = 1;
+	}
+}
+
+if(defined($ENV{'GITHUB_ACTION'}) || defined($ENV{'CIRCLECI'}) || defined($ENV{'TRAVIS_PERL_VERSION'}) || defined($ENV{'APPVEYOR'})) {
+	# Prevent downloading and installing stuff
+	diag('AUTOMATED_TESTING added for you') if(!defined($ENV{'AUTOMATED_TESTING'}));
+	$ENV{'AUTOMATED_TESTING'} = 1;
+	$ENV{'NO_NETWORK_TESTING'} = 1;
+}
+
+plan(skip_all => 'NO_NETWORK_TESTING set') if $ENV{'NO_NETWORK_TESTING'};
 
 # Create a test instance of CPAN::UnsupportedFinder
 my $finder = CPAN::UnsupportedFinder->new(verbose => $ENV{'TEST_VERBOSE'} ? 1 : 0);
@@ -48,7 +64,7 @@ foreach my $module (@$results) {
 	if($module->{'module'} eq 'Old-Unused-Module') {
 		cmp_ok($module->{'last_update'}, 'eq', 'Unknown', 'Unknown module has no valid date');
 	} else {
-		like($module->{'last_update'}, qr/^\d{4}-\d{2}-\d{2}/, 'Last update is a valid date');
+		like($module->{'last_update'}, qr/^\d{4}-\d{2}-\d{2}/, $module->{'module'} . ': Last update is a valid date');
 	}
 }
 

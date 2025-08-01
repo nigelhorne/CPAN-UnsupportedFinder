@@ -9,6 +9,9 @@ use Carp;
 use HTTP::Tiny;
 use Log::Log4perl;
 use JSON::MaybeXS;
+use Object::Configure;
+use Params::Get;
+use Return::Set;
 use Scalar::Util;
 
 =head1 NAME
@@ -73,18 +76,10 @@ sub new {
 	my $class = shift;
 
 	# Handle hash or hashref arguments
-	my %args;
-	if((@_ == 1) && (ref $_[0] eq 'HASH')) {
-		%args = %{$_[0]};
-	} elsif((@_ % 2) == 0) {
-		%args = @_;
-	} else {
-		carp(__PACKAGE__, ': Invalid arguments passed to new()');
-		return;
-	}
+	my $params = Params::Get::get_params(undef, @_) || {};
 
 	if(!defined($class)) {
-		if((scalar keys %args) > 0) {
+		if((scalar keys %{$params}) > 0) {
 			# Using CPAN::UnsupportedFinder::new(), not CPAN::UnsupportedFinder->new()
 			carp(__PACKAGE__, ' use ->new() not ::new() to instantiate');
 			return;
@@ -93,17 +88,21 @@ sub new {
 		$class = __PACKAGE__;
 	} elsif(Scalar::Util::blessed($class)) {
 		# If $class is an object, clone it with new arguments
-		return bless { %{$class}, %args }, ref($class);
+		return bless { %{$class}, %{$params} }, ref($class);
 	}
+
+	$params = Object::Configure::configure($class, $params);
 
 	my $self = {
 		api_url => 'https://fastapi.metacpan.org/v1',
 		cpan_testers => 'https://api.cpantesters.org/api/v1',
 		verbose => 0,
-		%args
+		%{$params}
 	};
 
-	if(!defined($self->{logger})) {
+	if(defined($self->{logger})) {
+		$self->{logger}->level($self->{verbose}, 'debug', 'error');
+	} else {
 		Log::Log4perl->easy_init($self->{verbose} ? $Log::Log4perl::DEBUG : $Log::Log4perl::ERROR);
 		$self->{logger} = Log::Log4perl->get_logger();
 	}
@@ -133,7 +132,7 @@ sub analyze {
 		push @results, $unsupported if($unsupported);
 	}
 
-	return \@results;
+	return Return::Set::set_return(\@results, { type => 'arrayref', 'max' => scalar(@modules) });
 }
 
 =head2 output_results

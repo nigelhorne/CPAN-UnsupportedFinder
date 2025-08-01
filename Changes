@@ -1,5 +1,9 @@
 Revision history for CPAN-UnsupportedFinder
 
+0.07
+	Don't do networking stuff on smokers and in CI
+	Use Return::Set
+
 0.06	Sat Jan 11 14:18:08 EST 2025
 	Fixed spelling
 	Added examples/all
