@@ -27,6 +27,7 @@ WriteMakefile(
 		'JSON::MaybeXS' => 0,
 		'Carp' => 0,
 		'Log::Log4perl' => 0,
+		'Object::Configure' => 0,
 		'Params::Get' => 0,
 		'Return::Set' => 0,
 		'Scalar::Util' => 0,
