@@ -27,6 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           cpanm --notest --quiet HTTP::Tiny JSON Carp Log::Log4perl
+          cpanm -iqn --skip-satisfied --installdeps --notest .
 
       - name: Run Unsupported Modules Analysis
         run: |
