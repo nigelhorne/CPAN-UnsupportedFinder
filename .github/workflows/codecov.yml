@@ -19,8 +19,8 @@ jobs:
     container:
       image: perl:stable
     steps:
-      - uses: actions/checkout@v6
-      - uses: codecov/codecov-action@v7
+      - uses: actions/checkout@v7
+      - uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
