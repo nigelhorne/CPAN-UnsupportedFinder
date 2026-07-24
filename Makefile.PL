@@ -43,8 +43,8 @@ WriteMakefile(
 				web => 'https://github.com/nigelhorne/CPAN-UnsupportedFinder/issues',
 			},
 		},
-	},
-	TEST_REQUIRES => {
+	}, TEST_REQUIRES => {
+		'IPC::System::Simple' => 0,
 		'Test::Compile' => 0,
 		'Test::DescribeMe' => 0,
 		'Test::HTML::Lint' => 0,
